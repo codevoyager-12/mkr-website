@@ -1,0 +1,100 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useCart } from "../context/CartContext";
+import "./Shop.css";
+
+export default function Shop() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Success message state
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const { addToCart } = useCart();
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/products")
+      .then((res) => {
+        setProducts(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("API Error: ", err);
+        setError("Could not load products. Is the server running?");
+        setLoading(false);
+      });
+  }, []);
+
+  const handleAddToCart = (product) => {
+    addToCart({
+      name: product.name,
+      price: Number(product.price),
+    });
+
+    setSuccessMessage(`${product.name} successfully added to cart!`);
+
+    setTimeout(() => {
+      setSuccessMessage("");
+    }, 2500);
+  };
+
+  if (loading)
+    return (
+      <div className="container">
+        <p>Loading products...</p>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="container">
+        <p style={{ color: "red" }}>{error}</p>
+      </div>
+    );
+
+  return (
+    <div className="container">
+      <h2 className="shop-title">Shop</h2>
+
+      {/* Success Notification */}
+      {successMessage && (
+        <div className="cart-success">
+          {successMessage}
+        </div>
+      )}
+
+      {products.length === 0 ? (
+        <p>No products found in the database.</p>
+      ) : (
+        <div className="product-grid">
+          {products.map((p) => (
+            <div className="product-card" key={p.id || p._id}>
+              <img
+                src={`http://localhost:5000${p.image_url}`}
+                alt={p.name}
+                onError={(e) => (e.target.style.display = "none")}
+              />
+
+              <h3>{p.name}</h3>
+
+              <p>{p.description}</p>
+
+              <div className="price-row">
+                <span>Rs. {p.price}</span>
+
+                <button
+                  className="btn"
+                  onClick={() => handleAddToCart(p)}
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

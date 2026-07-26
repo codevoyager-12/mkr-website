@@ -1,0 +1,32 @@
+.admin-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 500px;
+  margin-top: 20px;
+}
+
+.admin-form input,
+.admin-form textarea,
+.admin-form select {
+  background: #1a1a1a;
+  color: #fff;
+  border: 1px solid #d4af37;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.admin-form label {
+  color: #d4af37;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.image-preview {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #d4af37;
+  margin-top: 10px;
+}

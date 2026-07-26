@@ -1,0 +1,51 @@
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #333;
+  color: #fff;
+}
+
+.admin-table th {
+  color: #d4af37;
+}
+
+.admin-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #d4af37;
+  color: #d4af37;
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.btn-danger {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}

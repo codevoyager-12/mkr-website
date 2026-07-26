@@ -1,0 +1,130 @@
+.shop-title {
+  padding: 40px 0 20px;
+  color: var(--gold);
+}
+
+/* ===========================
+   SUCCESS MESSAGE
+=========================== */
+
+.cart-success {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  z-index: 1000;
+
+  background: #16a34a;
+  color: #fff;
+
+  padding: 14px 22px;
+  border-radius: 10px;
+
+  font-size: 0.95rem;
+  font-weight: 600;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+
+  animation: slideIn 0.3s ease;
+}
+
+/* ===========================
+   PRODUCT GRID
+=========================== */
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+  padding-bottom: 60px;
+}
+
+.product-card {
+  background: var(--black-soft);
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 16px;
+  transition: 0.25s;
+}
+
+.product-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+}
+
+.product-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  background: #222;
+}
+
+.product-card h3 {
+  color: var(--white);
+  margin-bottom: 6px;
+}
+
+.product-card p {
+  color: var(--gray);
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.price-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.price-row span {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--gold);
+}
+
+.price-row .btn {
+  width: 100%;
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.price-row .btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ===========================
+   ANIMATION
+=========================== */
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width: 768px) {
+  .cart-success {
+    left: 20px;
+    right: 20px;
+    top: 20px;
+    text-align: center;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+}

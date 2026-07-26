@@ -1,0 +1,58 @@
+.navbar {
+  background: var(--black-soft);
+  border-bottom: 1px solid var(--gold);
+  padding: 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Brand */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;              /* Space between logo and text */
+  text-decoration: none;
+}
+
+.logo-image {
+  width: 85px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.logo-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.logo-text span {
+  color: var(--white);
+}
+
+/* Navigation */
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.nav-links a {
+  color: var(--white);
+  font-weight: 500;
+  text-decoration: none;
+  transition: 0.25s;
+}
+
+.nav-links a:hover {
+  color: var(--gold);
+}
