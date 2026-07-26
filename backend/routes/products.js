@@ -4,11 +4,11 @@ const multer = require('multer');
 const { v2: cloudinary } = require('cloudinary');
 const db = require('../config/db');
 
-// Memory storage for Multer to support both Cloudinary upload and Base64 Data URL fallback
+// Memory storage for Multer
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 3 * 1024 * 1024 }, // 3MB file size limit
 });
 
 // Helper function to process uploaded image file
@@ -21,28 +21,37 @@ async function handleImageUpload(file) {
     process.env.CLOUDINARY_API_SECRET;
 
   if (hasCloudinary) {
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
-    });
+    try {
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME.trim(),
+        api_key: process.env.CLOUDINARY_API_KEY.trim(),
+        api_secret: process.env.CLOUDINARY_API_SECRET.trim(),
+      });
 
-    return new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: 'mkr_store_products' },
-        (error, result) => {
-          if (error) return reject(error);
-          resolve(result.secure_url);
-        }
+      const cloudinaryUrl = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: 'mkr_store_products' },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result.secure_url);
+          }
+        );
+        stream.end(file.buffer);
+      });
+
+      return cloudinaryUrl;
+    } catch (cloudinaryErr) {
+      console.warn(
+        'Cloudinary upload failed (signature or credentials issue), falling back to Base64 Data URL:',
+        cloudinaryErr.message
       );
-      stream.end(file.buffer);
-    });
-  } else {
-    // Base64 fallback when Cloudinary environment variables are missing
-    const mime = file.mimetype || 'image/png';
-    const base64 = file.buffer.toString('base64');
-    return `data:${mime};base64,${base64}`;
+    }
   }
+
+  // Base64 fallback when Cloudinary is missing or fails signature check
+  const mime = file.mimetype || 'image/png';
+  const base64 = file.buffer.toString('base64');
+  return `data:${mime};base64,${base64}`;
 }
 
 // 1. GET All Products
@@ -69,15 +78,32 @@ router.get('/:id', async (req, res) => {
 });
 
 // 3. POST New Product
-router.post('/', upload.single('image'), async (req, res) => {
+router.post('/', (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'Image file exceeds maximum allowed size of 3 MB.' });
+      }
+      return res.status(400).json({ error: err.message || 'Image upload error.' });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
     const { name, price, description, category, image_url: textImageUrl } = req.body;
 
+    if (!name || price === undefined) {
+      return res.status(400).json({ error: 'Product name and price are required.' });
+    }
+
     let image_url = '';
     if (req.file) {
+      if (req.file.size > 3 * 1024 * 1024) {
+        return res.status(400).json({ error: 'Image size must be less than 3 MB.' });
+      }
       image_url = await handleImageUpload(req.file);
-    } else if (textImageUrl) {
-      image_url = textImageUrl;
+    } else if (textImageUrl && textImageUrl.trim() !== '') {
+      image_url = textImageUrl.trim();
     } else {
       image_url = '/uploads/number_plate.png';
     }
@@ -95,16 +121,29 @@ router.post('/', upload.single('image'), async (req, res) => {
 });
 
 // 4. PUT Update Product
-router.put('/:id', upload.single('image'), async (req, res) => {
+router.put('/:id', (req, res, next) => {
+  upload.single('image')(req, res, (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'Image file exceeds maximum allowed size of 3 MB.' });
+      }
+      return res.status(400).json({ error: err.message || 'Image upload error.' });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, price, description, category, image_url: textImageUrl } = req.body;
 
     let newImageUrl = null;
     if (req.file) {
+      if (req.file.size > 3 * 1024 * 1024) {
+        return res.status(400).json({ error: 'Image size must be less than 3 MB.' });
+      }
       newImageUrl = await handleImageUpload(req.file);
-    } else if (textImageUrl) {
-      newImageUrl = textImageUrl;
+    } else if (textImageUrl && textImageUrl.trim() !== '') {
+      newImageUrl = textImageUrl.trim();
     }
 
     if (newImageUrl) {

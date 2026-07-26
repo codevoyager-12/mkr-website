@@ -2,10 +2,12 @@ import { useState } from 'react';
 import axios from 'axios';
 import './AdminAddProduct.css';
 
+const MAX_SIZE_BYTES = 3 * 1024 * 1024; // 3 MB
+
 // Helper to compress large image files before sending over network to Vercel
 const compressImage = (file) => {
   return new Promise((resolve) => {
-    if (!file || !file.type.startsWith('image/') || file.size <= 400 * 1024) {
+    if (!file || !file.type.startsWith('image/') || file.size <= 300 * 1024) {
       return resolve(file);
     }
     const reader = new FileReader();
@@ -72,6 +74,18 @@ export default function AdminAddProduct() {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > MAX_SIZE_BYTES) {
+        setStatus({
+          loading: false,
+          error: `Image file must be less than 3 MB (Selected file: ${(file.size / (1024 * 1024)).toFixed(2)} MB). Please select a smaller image.`,
+          success: false,
+        });
+        setImageFile(null);
+        setPreview(null);
+        e.target.value = '';
+        return;
+      }
+      setStatus({ loading: false, error: null, success: false });
       const compressed = await compressImage(file);
       setImageFile(compressed);
       setPreview(URL.createObjectURL(compressed));
@@ -86,7 +100,7 @@ export default function AdminAddProduct() {
     setStatus({ loading: true, error: null, success: false });
 
     if (!imageFile && !form.imageUrl) {
-      setStatus({ loading: false, error: 'Please upload an image file or provide an Image URL.', success: false });
+      setStatus({ loading: false, error: 'Please upload an image file (under 3 MB) or provide an Image URL.', success: false });
       return;
     }
 
@@ -138,7 +152,7 @@ export default function AdminAddProduct() {
         <label>Description</label>
         <textarea name="description" value={form.description} onChange={handleChange} rows="4" />
 
-        <label>Product Image File</label>
+        <label>Product Image File (Max size: 3 MB)</label>
         <input type="file" accept="image/*" onChange={handleFileChange} />
 
         <label>Or Image URL (Optional)</label>

@@ -3,10 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './AdminAddProduct.css';
 
+const MAX_SIZE_BYTES = 3 * 1024 * 1024; // 3 MB
+
 // Helper to compress large image files before sending over network to Vercel
 const compressImage = (file) => {
   return new Promise((resolve) => {
-    if (!file || !file.type.startsWith('image/') || file.size <= 400 * 1024) {
+    if (!file || !file.type.startsWith('image/') || file.size <= 300 * 1024) {
       return resolve(file);
     }
     const reader = new FileReader();
@@ -88,6 +90,17 @@ export default function AdminEditProduct() {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > MAX_SIZE_BYTES) {
+        setStatus({
+          loading: false,
+          error: `Image file must be less than 3 MB (Selected file: ${(file.size / (1024 * 1024)).toFixed(2)} MB). Please select a smaller image.`,
+          success: false,
+        });
+        setImageFile(null);
+        e.target.value = '';
+        return;
+      }
+      setStatus({ loading: false, error: null, success: false });
       const compressed = await compressImage(file);
       setImageFile(compressed);
     } else {
@@ -156,7 +169,7 @@ export default function AdminEditProduct() {
           />
         )}
 
-        <label>Replace Image File (optional)</label>
+        <label>Replace Image File (Max size: 3 MB)</label>
         <input type="file" accept="image/*" onChange={handleFileChange} />
 
         <label>Or Replace with Image URL (optional)</label>
