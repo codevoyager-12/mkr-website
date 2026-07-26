@@ -1,128 +1,107 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/db');
-const upload = require('../middleware/upload');
-const fs = require('fs');
-const path = require('path');
+const multer = require('multer');
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const db = require('../db'); // Adjust path to your database configuration if needed
 
-// GET all products, optional ?category=plate|apparel
+// 1. Configure Cloudinary using Vercel Environment Variables
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// 2. Set up Multer Storage to send uploads directly to Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'mkr_store_products', // Creates a folder in your Cloudinary Media Library
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+  },
+});
+
+const upload = multer({ storage: storage });
+
+// 3. GET All Products
 router.get('/', async (req, res) => {
   try {
-    const { category } = req.query;
-    let query = 'SELECT * FROM products';
-    const params = [];
-    if (category) {
-      query += ' WHERE category = ?';
-      params.push(category);
-    }
-    const [rows] = await db.query(query, params);
-    res.json(rows);
+    const [products] = await db.query('SELECT * FROM products');
+    res.json(products);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Fetch products error:', err);
+    res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
 
-// GET single product
+// 4. GET Single Product by ID
 router.get('/:id', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM products WHERE id = ?', [req.params.id]);
-    if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
+    if (rows.length === 0) return res.status(404).json({ error: 'Product not found' });
     res.json(rows[0]);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Fetch product error:', err);
+    res.status(500).json({ error: 'Failed to fetch product' });
   }
 });
 
-// CREATE a new product
+// 5. POST New Product (Uploads image to Cloudinary)
 router.post('/', upload.single('image'), async (req, res) => {
   try {
     const { name, price, description, category } = req.body;
 
-    if (!name || !price || !req.file) {
-      return res.status(400).json({ error: 'Name, price, and image are required.' });
-    }
+    // Cloudinary automatically returns the live HTTPS URL in req.file.path
+    const image_url = req.file ? req.file.path : '';
 
-    const image_url = `/uploads/${req.file.filename}`;
-    const sql = 'INSERT INTO products (name, category, description, price, image_url) VALUES (?, ?, ?, ?, ?)';
+    const [result] = await db.query(
+      'INSERT INTO products (name, price, description, category, image_url) VALUES (?, ?, ?, ?, ?)',
+      [name, price, description, category, image_url]
+    );
 
-    const [result] = await db.query(sql, [name, category || 'plate', description, price, image_url]);
-
-    res.status(201).json({
-      id: result.insertId,
-      name,
-      category: category || 'plate',
-      description,
-      price,
-      image_url,
-    });
+    res.status(201).json({ message: 'Product added successfully', id: result.insertId });
   } catch (err) {
-    console.error('DB Insert Error:', err);
-    res.status(500).json({ error: err.message });
+    console.error('Add product error:', err);
+    res.status(500).json({ error: 'Failed to add product' });
   }
 });
 
-// UPDATE a product (with optional new image)
+// 6. PUT Update Product
 router.put('/:id', upload.single('image'), async (req, res) => {
   try {
-    const { name, price, description, category } = req.body;
     const { id } = req.params;
-
-    const [existingRows] = await db.query('SELECT * FROM products WHERE id = ?', [id]);
-    if (existingRows.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-    const existing = existingRows[0];
-
-    let image_url = existing.image_url;
+    const { name, price, description, category } = req.body;
 
     if (req.file) {
-      image_url = `/uploads/${req.file.filename}`;
-
-      const oldFilePath = path.join(__dirname, '..', existing.image_url);
-      fs.unlink(oldFilePath, (err) => {
-        if (err) console.warn('Could not delete old image:', err.message);
-      });
+      // If a new image was uploaded to Cloudinary
+      const image_url = req.file.path;
+      await db.query(
+        'UPDATE products SET name = ?, price = ?, description = ?, category = ?, image_url = ? WHERE id = ?',
+        [name, price, description, category, image_url, id]
+      );
+    } else {
+      // If image was left unchanged
+      await db.query(
+        'UPDATE products SET name = ?, price = ?, description = ?, category = ? WHERE id = ?',
+        [name, price, description, category, id]
+      );
     }
 
-    const sql = `UPDATE products 
-                 SET name = ?, category = ?, description = ?, price = ?, image_url = ? 
-                 WHERE id = ?`;
-    await db.query(sql, [
-      name ?? existing.name,
-      category ?? existing.category,
-      description ?? existing.description,
-      price ?? existing.price,
-      image_url,
-      id,
-    ]);
-
-    res.json({ id, name, category, description, price, image_url });
+    res.json({ message: 'Product updated successfully' });
   } catch (err) {
-    console.error('DB Update Error:', err);
-    res.status(500).json({ error: err.message });
+    console.error('Update product error:', err);
+    res.status(500).json({ error: 'Failed to update product' });
   }
 });
 
-// DELETE a product
+// 7. DELETE Product
 router.delete('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const [rows] = await db.query('SELECT * FROM products WHERE id = ?', [id]);
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Product not found' });
-    }
-
-    const filePath = path.join(__dirname, '..', rows[0].image_url);
-    fs.unlink(filePath, (err) => {
-      if (err) console.warn('Could not delete image file:', err.message);
-    });
-
-    await db.query('DELETE FROM products WHERE id = ?', [id]);
+    await db.query('DELETE FROM products WHERE id = ?', [req.params.id]);
     res.json({ message: 'Product deleted successfully' });
   } catch (err) {
-    console.error('DB Delete Error:', err);
-    res.status(500).json({ error: err.message });
+    console.error('Delete product error:', err);
+    res.status(500).json({ error: 'Failed to delete product' });
   }
 });
 
