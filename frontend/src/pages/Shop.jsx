@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useCart } from "../context/CartContext";
-import ProductModal from "../components/ProductModal";
+import ProductModal from "../pages/ProductModal";
 import "./Shop.css";
 
 export default function Shop() {
