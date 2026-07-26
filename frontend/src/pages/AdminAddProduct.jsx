@@ -62,7 +62,7 @@ const compressImage = (file) => {
 };
 
 export default function AdminAddProduct() {
-  const [form, setForm] = useState({ name: '', price: '', description: '', category: 'plate', imageUrl: '' });
+  const [form, setForm] = useState({ name: '', price: '', description: '', category: 'plate' });
   const [imageFile, setImageFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [status, setStatus] = useState({ loading: false, error: null, success: false });
@@ -99,8 +99,8 @@ export default function AdminAddProduct() {
     e.preventDefault();
     setStatus({ loading: true, error: null, success: false });
 
-    if (!imageFile && !form.imageUrl) {
-      setStatus({ loading: false, error: 'Please upload an image file (under 3 MB) or provide an Image URL.', success: false });
+    if (!imageFile) {
+      setStatus({ loading: false, error: 'Please select an image file (under 3 MB).', success: false });
       return;
     }
 
@@ -109,20 +109,14 @@ export default function AdminAddProduct() {
     data.append('price', form.price);
     data.append('description', form.description);
     data.append('category', form.category);
-
-    if (imageFile) {
-      data.append('image', imageFile);
-    }
-    if (form.imageUrl) {
-      data.append('image_url', form.imageUrl);
-    }
+    data.append('image', imageFile);
 
     try {
       await axios.post('/api/products', data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setStatus({ loading: false, error: null, success: true });
-      setForm({ name: '', price: '', description: '', category: 'plate', imageUrl: '' });
+      setForm({ name: '', price: '', description: '', category: 'plate' });
       setImageFile(null);
       setPreview(null);
       if (e.target && e.target.reset) e.target.reset();
@@ -152,21 +146,12 @@ export default function AdminAddProduct() {
         <label>Description</label>
         <textarea name="description" value={form.description} onChange={handleChange} rows="4" />
 
-        <label>Product Image File (Max size: 3 MB)</label>
-        <input type="file" accept="image/*" onChange={handleFileChange} />
+        <label>Product Image (Max size: 3 MB)</label>
+        <input type="file" accept="image/*" onChange={handleFileChange} required />
 
-        <label>Or Image URL (Optional)</label>
-        <input
-          type="text"
-          name="imageUrl"
-          placeholder="https://example.com/image.jpg"
-          value={form.imageUrl}
-          onChange={handleChange}
-        />
-
-        {(preview || form.imageUrl) && (
+        {preview && (
           <img
-            src={preview || form.imageUrl}
+            src={preview}
             alt="Preview"
             className="image-preview"
             onError={(e) => (e.target.style.display = 'none')}

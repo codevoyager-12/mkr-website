@@ -65,7 +65,7 @@ const compressImage = (file) => {
 export default function AdminEditProduct() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', price: '', description: '', category: 'plate', imageUrl: '' });
+  const [form, setForm] = useState({ name: '', price: '', description: '', category: 'plate' });
   const [imageFile, setImageFile] = useState(null);
   const [currentImage, setCurrentImage] = useState(null);
   const [status, setStatus] = useState({ loading: false, error: null, success: false });
@@ -75,7 +75,7 @@ export default function AdminEditProduct() {
     axios.get(`/api/products/${id}`)
       .then((res) => {
         const p = res.data;
-        setForm({ name: p.name, price: p.price, description: p.description, category: p.category, imageUrl: '' });
+        setForm({ name: p.name, price: p.price, description: p.description, category: p.category });
         setCurrentImage(p.image_url);
         setFetching(false);
       })
@@ -120,9 +120,6 @@ export default function AdminEditProduct() {
 
     if (imageFile) {
       data.append('image', imageFile);
-    }
-    if (form.imageUrl) {
-      data.append('image_url', form.imageUrl);
     }
 
     try {
@@ -169,17 +166,8 @@ export default function AdminEditProduct() {
           />
         )}
 
-        <label>Replace Image File (Max size: 3 MB)</label>
+        <label>Replace Image (optional, Max size: 3 MB)</label>
         <input type="file" accept="image/*" onChange={handleFileChange} />
-
-        <label>Or Replace with Image URL (optional)</label>
-        <input
-          type="text"
-          name="imageUrl"
-          placeholder="https://example.com/image.jpg"
-          value={form.imageUrl}
-          onChange={handleChange}
-        />
 
         <button type="submit" className="btn" disabled={status.loading}>
           {status.loading ? 'Updating...' : 'Update Product'}

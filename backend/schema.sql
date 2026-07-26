@@ -7,7 +7,7 @@ CREATE TABLE products (
   category ENUM('plate','apparel') NOT NULL,
   description TEXT,
   price DECIMAL(10,2) NOT NULL,
-  image_url VARCHAR(255),
+  image_url LONGTEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
