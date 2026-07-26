@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useCart } from "../context/CartContext";
+import ProductModal from "../components/ProductModal";
 import "./Shop.css";
 
 export default function Shop() {
@@ -10,6 +11,9 @@ export default function Shop() {
 
   // Success message state
   const [successMessage, setSuccessMessage] = useState("");
+
+  // Selected product for the enlarged modal view
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const { addToCart } = useCart();
 
@@ -71,7 +75,12 @@ export default function Shop() {
       ) : (
         <div className="product-grid">
           {products.map((p) => (
-            <div className="product-card" key={p.id || p._id}>
+            <div
+              className="product-card"
+              key={p.id || p._id}
+              onClick={() => setSelectedProduct(p)}
+              style={{ cursor: "pointer" }}
+            >
               {/* ✅ Removed http://localhost:5000 from image URL */}
               <img
                 src={p.image_url ? (p.image_url.startsWith("http") ? p.image_url : `${p.image_url}`) : ""}
@@ -88,7 +97,10 @@ export default function Shop() {
 
                 <button
                   className="btn"
-                  onClick={() => handleAddToCart(p)}
+                  onClick={(e) => {
+                    e.stopPropagation(); // don't trigger the modal when adding to cart
+                    handleAddToCart(p);
+                  }}
                 >
                   Add to Cart
                 </button>
@@ -97,6 +109,13 @@ export default function Shop() {
           ))}
         </div>
       )}
+
+      {/* Enlarged product view */}
+      <ProductModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={handleAddToCart}
+      />
     </div>
   );
 }
