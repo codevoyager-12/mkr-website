@@ -15,7 +15,7 @@ export default function Checkout() {
 
   const [orderId, setOrderId] = useState(null);
   const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false); // NEW
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setForm({
@@ -27,7 +27,7 @@ export default function Checkout() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (isSubmitting) return; // guard: ignore clicks while a request is in flight
+    if (isSubmitting) return;
 
     setError('');
     setIsSubmitting(true);
@@ -35,7 +35,8 @@ export default function Checkout() {
     const plateItem = cart.find((item) => item.plate_text);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/orders', {
+      // ✅ Changed from 'http://localhost:5000/api/orders' to relative path '/api/orders'
+      const res = await axios.post('/api/orders', {
         ...form,
         items: cart,
         plate_text: plateItem?.plate_text || null,
@@ -48,7 +49,7 @@ export default function Checkout() {
     } catch (err) {
       console.error(err);
       setError('Something went wrong. Please try again.');
-      setIsSubmitting(false); // only reset on failure, so success keeps button disabled
+      setIsSubmitting(false);
     }
   };
 
@@ -58,9 +59,11 @@ export default function Checkout() {
         <div className="success-icon">✓</div>
         <h2>Order Received!</h2>
         <p className="order-id">Order ID: #{orderId}</p>
-        <p>Thank you, {form.customer_name}! Our team has received your order details
+        <p>
+          Thank you, {form.customer_name}! Our team has received your order details
           and will contact you shortly on <strong>{form.phone}</strong> to confirm
-          payment and delivery.</p>
+          payment and delivery.
+        </p>
         <a href="/" className="btn">Back to Home</a>
       </div>
     );

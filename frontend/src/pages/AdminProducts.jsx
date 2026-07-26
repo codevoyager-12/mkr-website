@@ -8,7 +8,8 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
 
   const fetchProducts = () => {
-    axios.get('http://localhost:5000/api/products')
+    // ✅ Replaced localhost with relative path
+    axios.get('/api/products')
       .then((res) => {
         setProducts(res.data);
         setLoading(false);
@@ -26,7 +27,8 @@ export default function AdminProducts() {
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
     try {
-      await axios.delete(`http://localhost:5000/api/products/${id}`);
+      // ✅ Replaced localhost with relative path
+      await axios.delete(`/api/products/${id}`);
       setProducts(products.filter((p) => p.id !== id));
     } catch (err) {
       console.error(err);
@@ -57,10 +59,12 @@ export default function AdminProducts() {
           {products.map((p) => (
             <tr key={p.id}>
               <td>
+                {/* ✅ Removed hardcoded localhost */}
                 <img
-                  src={`http://localhost:5000${p.image_url}`}
+                  src={p.image_url ? (p.image_url.startsWith('http') ? p.image_url : p.image_url) : ''}
                   alt={p.name}
                   className="admin-thumb"
+                  onError={(e) => (e.target.style.display = 'none')}
                 />
               </td>
               <td>{p.name}</td>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './AdminAddProduct.css'; // reuse the same styling
+import './AdminAddProduct.css';
 
 export default function AdminEditProduct() {
   const { id } = useParams();
@@ -13,7 +13,8 @@ export default function AdminEditProduct() {
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/products/${id}`)
+    // ✅ Replaced localhost with relative path
+    axios.get(`/api/products/${id}`)
       .then((res) => {
         const p = res.data;
         setForm({ name: p.name, price: p.price, description: p.description, category: p.category });
@@ -38,10 +39,11 @@ export default function AdminEditProduct() {
     data.append('price', form.price);
     data.append('description', form.description);
     data.append('category', form.category);
-    if (imageFile) data.append('image', imageFile); // only send if a new one was picked
+    if (imageFile) data.append('image', imageFile);
 
     try {
-      await axios.put(`http://localhost:5000/api/products/${id}`, data, {
+      // ✅ Replaced localhost with relative path
+      await axios.put(`/api/products/${id}`, data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setStatus({ loading: false, error: null, success: true });
@@ -75,10 +77,12 @@ export default function AdminEditProduct() {
 
         <label>Current Image</label>
         {currentImage && (
+          /* ✅ Safe image path rendering */
           <img
-            src={`http://localhost:5000${currentImage}`}
+            src={currentImage.startsWith('http') ? currentImage : currentImage}
             alt="Current"
             className="image-preview"
+            onError={(e) => (e.target.style.display = 'none')}
           />
         )}
 

@@ -35,7 +35,8 @@ export default function AdminAddProduct() {
     data.append('image', imageFile);
 
     try {
-      await axios.post('http://localhost:5000/api/products', data, {
+      // ✅ Changed 'http://localhost:5000/api/products' to relative '/api/products'
+      await axios.post('/api/products', data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setStatus({ loading: false, error: null, success: true });
