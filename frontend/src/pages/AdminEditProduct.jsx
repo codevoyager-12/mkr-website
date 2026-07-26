@@ -3,21 +3,77 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './AdminAddProduct.css';
 
+// Helper to compress large image files before sending over network to Vercel
+const compressImage = (file) => {
+  return new Promise((resolve) => {
+    if (!file || !file.type.startsWith('image/') || file.size <= 400 * 1024) {
+      return resolve(file);
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1000;
+        const MAX_HEIGHT = 1000;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.85
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+};
+
 export default function AdminEditProduct() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', price: '', description: '', category: 'plate' });
+  const [form, setForm] = useState({ name: '', price: '', description: '', category: 'plate', imageUrl: '' });
   const [imageFile, setImageFile] = useState(null);
   const [currentImage, setCurrentImage] = useState(null);
   const [status, setStatus] = useState({ loading: false, error: null, success: false });
   const [fetching, setFetching] = useState(true);
 
   useEffect(() => {
-    // ✅ Replaced localhost with relative path
     axios.get(`/api/products/${id}`)
       .then((res) => {
         const p = res.data;
-        setForm({ name: p.name, price: p.price, description: p.description, category: p.category });
+        setForm({ name: p.name, price: p.price, description: p.description, category: p.category, imageUrl: '' });
         setCurrentImage(p.image_url);
         setFetching(false);
       })
@@ -28,7 +84,16 @@ export default function AdminEditProduct() {
   }, [id]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleFileChange = (e) => setImageFile(e.target.files[0]);
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const compressed = await compressImage(file);
+      setImageFile(compressed);
+    } else {
+      setImageFile(null);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,18 +104,24 @@ export default function AdminEditProduct() {
     data.append('price', form.price);
     data.append('description', form.description);
     data.append('category', form.category);
-    if (imageFile) data.append('image', imageFile);
+
+    if (imageFile) {
+      data.append('image', imageFile);
+    }
+    if (form.imageUrl) {
+      data.append('image_url', form.imageUrl);
+    }
 
     try {
-      // ✅ Replaced localhost with relative path
       await axios.put(`/api/products/${id}`, data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setStatus({ loading: false, error: null, success: true });
       setTimeout(() => navigate('/admin/products'), 1000);
     } catch (err) {
-      console.error(err);
-      setStatus({ loading: false, error: 'Failed to update product.', success: false });
+      console.error('Update product error:', err);
+      const serverMsg = err.response?.data?.error || err.message || 'Failed to update product.';
+      setStatus({ loading: false, error: serverMsg, success: false });
     }
   };
 
@@ -77,24 +148,32 @@ export default function AdminEditProduct() {
 
         <label>Current Image</label>
         {currentImage && (
-          /* ✅ Safe image path rendering */
           <img
-            src={currentImage.startsWith('http') ? currentImage : currentImage}
+            src={currentImage}
             alt="Current"
             className="image-preview"
             onError={(e) => (e.target.style.display = 'none')}
           />
         )}
 
-        <label>Replace Image (optional)</label>
+        <label>Replace Image File (optional)</label>
         <input type="file" accept="image/*" onChange={handleFileChange} />
+
+        <label>Or Replace with Image URL (optional)</label>
+        <input
+          type="text"
+          name="imageUrl"
+          placeholder="https://example.com/image.jpg"
+          value={form.imageUrl}
+          onChange={handleChange}
+        />
 
         <button type="submit" className="btn" disabled={status.loading}>
           {status.loading ? 'Updating...' : 'Update Product'}
         </button>
 
-        {status.error && <p style={{ color: 'red' }}>{status.error}</p>}
-        {status.success && <p style={{ color: 'lightgreen' }}>Product updated! Redirecting...</p>}
+        {status.error && <p style={{ color: 'red', marginTop: '10px' }}>{status.error}</p>}
+        {status.success && <p style={{ color: 'lightgreen', marginTop: '10px' }}>Product updated! Redirecting...</p>}
       </form>
     </div>
   );
