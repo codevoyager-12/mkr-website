@@ -10,7 +10,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   ssl: {
-    rejectUnauthorized: true, // Required for TiDB Cloud
+    rejectUnauthorized: false, // Prevents Vercel serverless SSL CA verification failures
   },
 });
 

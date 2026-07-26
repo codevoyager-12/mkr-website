@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const { v2: cloudinary } = require('cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const db = require('../db'); // Adjust path to your database configuration if needed
+const db = require('../config/db'); // Adjust path to your database configuration if needed
 
 // 1. Configure Cloudinary using Vercel Environment Variables
 cloudinary.config({
