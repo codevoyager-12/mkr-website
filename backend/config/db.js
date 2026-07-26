@@ -1,5 +1,8 @@
 const mysql = require('mysql2');
-require('dotenv').config();
+const path = require('path');
+
+// Explicitly resolve path to backend/.env
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -10,7 +13,7 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   ssl: {
-    rejectUnauthorized: false, // Prevents Vercel serverless SSL CA verification failures
+    rejectUnauthorized: false,
   },
 });
 
