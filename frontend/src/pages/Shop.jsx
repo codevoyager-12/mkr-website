@@ -14,8 +14,9 @@ export default function Shop() {
   const { addToCart } = useCart();
 
   useEffect(() => {
+    // ✅ Changed to relative path so Vercel proxies it to the backend automatically
     axios
-      .get("http://localhost:5000/api/products")
+      .get("/api/products")
       .then((res) => {
         setProducts(res.data);
         setLoading(false);
@@ -71,8 +72,9 @@ export default function Shop() {
         <div className="product-grid">
           {products.map((p) => (
             <div className="product-card" key={p.id || p._id}>
+              {/* ✅ Removed http://localhost:5000 from image URL */}
               <img
-                src={`http://localhost:5000${p.image_url}`}
+                src={p.image_url ? (p.image_url.startsWith("http") ? p.image_url : `${p.image_url}`) : ""}
                 alt={p.name}
                 onError={(e) => (e.target.style.display = "none")}
               />
