@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { useCart } from "../context/CartContext";
 import "./Customize.css";
 
-const PLATE_COLORS = [
+const DEFAULT_PLATE_COLORS = [
   { name: "Yellow MKR Edition", bg: "#f1c40f", border: "#d4af37", text: "#000000" },
   { name: "Jet Black", bg: "#0d0d0d", border: "#d4af37", text: "#f1d97a" },
   { name: "Gold Edition", bg: "#d4af37", border: "#f5d76e", text: "#000000" },
@@ -11,7 +12,7 @@ const PLATE_COLORS = [
   { name: "Silver Metallic", bg: "#c0c0c0", border: "#ffffff", text: "#000000" },
 ];
 
-const TEXT_COLORS = [
+const DEFAULT_TEXT_COLORS = [
   { name: "Black", color: "#000000" },
   { name: "Gold", color: "#d4af37" },
   { name: "White", color: "#ffffff" },
@@ -23,25 +24,79 @@ export default function Customize() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  const [plateText, setPlateText] = useState("MKR");
-  const [cityText, setCityText] = useState("PAKISTAN");
-  const [plateColor, setPlateColor] = useState(0); // Default to Yellow MKR Edition
-  const [textColor, setTextColor] = useState(0);
-  const [gelFinish, setGelFinish] = useState(true);
+  const [plateText, setPlateText] = useState("MKR-786");
+  const [plateColorIdx, setPlateColorIdx] = useState(0);
+  const [textColorIdx, setTextColorIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
-  let price = 3600;
-  if (gelFinish) price += 500;
-  const total = price * quantity;
+  // Dynamic admin customization settings
+  const [basePrice, setBasePrice] = useState(3600);
+  const [plateColors, setPlateColors] = useState(DEFAULT_PLATE_COLORS);
+  const [textColors, setTextColors] = useState(DEFAULT_TEXT_COLORS);
+  const [extraOptions, setExtraOptions] = useState([
+    { id: "gel_finish", label: "3D Gel Acrylic Embossing", price: 500 }
+  ]);
+  const [selectedAddons, setSelectedAddons] = useState({ gel_finish: true });
+
+  useEffect(() => {
+    // Fetch live customization settings managed by Admin
+    axios.get("/api/customization")
+      .then((res) => {
+        if (res.data) {
+          if (res.data.base_price) setBasePrice(Number(res.data.base_price));
+          if (Array.isArray(res.data.plate_colors) && res.data.plate_colors.length > 0) {
+            setPlateColors(res.data.plate_colors);
+          }
+          if (Array.isArray(res.data.text_colors) && res.data.text_colors.length > 0) {
+            setTextColors(res.data.text_colors);
+          }
+          if (Array.isArray(res.data.extra_options)) {
+            setExtraOptions(res.data.extra_options);
+            // Default select first addon if exists
+            const initialSelection = {};
+            res.data.extra_options.forEach((opt) => {
+              initialSelection[opt.id] = true;
+            });
+            setSelectedAddons(initialSelection);
+          }
+        }
+      })
+      .catch((err) => console.error("Fetch customization error:", err));
+  }, []);
+
+  const handleToggleAddon = (optId) => {
+    setSelectedAddons((prev) => ({
+      ...prev,
+      [optId]: !prev[optId],
+    }));
+  };
+
+  // Calculate Unit Price
+  let unitPrice = basePrice;
+  extraOptions.forEach((opt) => {
+    if (selectedAddons[opt.id]) {
+      unitPrice += Number(opt.price) || 0;
+    }
+  });
+
+  const total = unitPrice * quantity;
+
+  const currentPlateColor = plateColors[plateColorIdx] || plateColors[0] || DEFAULT_PLATE_COLORS[0];
+  const currentTextColor = textColors[textColorIdx] || textColors[0] || DEFAULT_TEXT_COLORS[0];
 
   const handleAdd = () => {
+    const selectedAddonLabels = extraOptions
+      .filter((opt) => selectedAddons[opt.id])
+      .map((opt) => `${opt.label} (+Rs. ${opt.price})`)
+      .join(", ");
+
     addToCart({
       name: `Custom Plate (${plateText})`,
       price: total,
-      plate_text: `${plateText} (${cityText})`,
-      plate_color: PLATE_COLORS[plateColor].name,
-      text_color: TEXT_COLORS[textColor].name,
-      gel_finish: gelFinish,
+      plate_text: plateText,
+      plate_color: currentPlateColor.name,
+      text_color: currentTextColor.name,
+      addons: selectedAddonLabels || "Standard",
       quantity,
     });
 
@@ -66,19 +121,21 @@ export default function Customize() {
           <div
             className="plate-preview-box-large"
             style={{
-              backgroundColor: PLATE_COLORS[plateColor].bg,
-              borderColor: PLATE_COLORS[plateColor].border,
-              color: TEXT_COLORS[textColor].color,
+              backgroundColor: currentPlateColor.bg,
+              borderColor: currentPlateColor.border,
+              color: currentTextColor.color,
             }}
           >
-            <div className="plate-top-city">{cityText || "PAKISTAN"}</div>
-            <div className="plate-main-number">{plateText || "MKR"}</div>
+            <div className="plate-main-number">{plateText || "YOUR TEXT"}</div>
           </div>
 
           <div className="preview-spec-list">
-            <p><strong>Finish:</strong> {PLATE_COLORS[plateColor].name}</p>
-            <p><strong>Text Color:</strong> {TEXT_COLORS[textColor].name}</p>
-            <p><strong>3D Gel Embossing:</strong> {gelFinish ? "Yes (+Rs. 500)" : "Standard"}</p>
+            <p><strong>Finish:</strong> {currentPlateColor.name}</p>
+            <p><strong>Text Color:</strong> {currentTextColor.name}</p>
+            <p>
+              <strong>Selected Addons:</strong>{" "}
+              {extraOptions.filter((opt) => selectedAddons[opt.id]).map((opt) => opt.label).join(", ") || "None"}
+            </p>
           </div>
         </div>
 
@@ -86,40 +143,28 @@ export default function Customize() {
         <div className="controls glass-panel">
           <h3>Customization Options</h3>
 
-          {/* Plate Main Text */}
+          {/* SINGLE INPUT FOR PLATE NUMBER TEXT ONLY */}
           <div className="control-group">
-            <label>Plate Number Text (Max 8 Chars)</label>
+            <label>Plate Number Text</label>
             <input
-              maxLength={8}
+              maxLength={10}
               value={plateText}
               onChange={(e) => setPlateText(e.target.value.toUpperCase())}
-              placeholder="MKR"
-              className="text-input-3d"
-            />
-          </div>
-
-          {/* City / Top Text */}
-          <div className="control-group">
-            <label>City / Top Header Text</label>
-            <input
-              maxLength={12}
-              value={cityText}
-              onChange={(e) => setCityText(e.target.value.toUpperCase())}
-              placeholder="PAKISTAN"
+              placeholder="ABC-123"
               className="text-input-3d"
             />
           </div>
 
           {/* Plate Color */}
           <div className="control-group">
-            <label>Plate Base Finish ({PLATE_COLORS[plateColor].name})</label>
+            <label>Plate Base Finish ({currentPlateColor.name})</label>
             <div className="color-options">
-              {PLATE_COLORS.map((c, i) => (
+              {plateColors.map((c, i) => (
                 <button
-                  key={c.name}
-                  className={`color-swatch ${plateColor === i ? "active" : ""}`}
+                  key={c.name + i}
+                  className={`color-swatch ${plateColorIdx === i ? "active" : ""}`}
                   style={{ background: c.bg, borderColor: c.border }}
-                  onClick={() => setPlateColor(i)}
+                  onClick={() => setPlateColorIdx(i)}
                   title={c.name}
                 />
               ))}
@@ -128,32 +173,41 @@ export default function Customize() {
 
           {/* Text Color */}
           <div className="control-group">
-            <label>Embossed Text Color ({TEXT_COLORS[textColor].name})</label>
+            <label>Embossed Text Color ({currentTextColor.name})</label>
             <div className="color-options">
-              {TEXT_COLORS.map((c, i) => (
+              {textColors.map((c, i) => (
                 <button
-                  key={c.name}
-                  className={`color-swatch ${textColor === i ? "active" : ""}`}
+                  key={c.name + i}
+                  className={`color-swatch ${textColorIdx === i ? "active" : ""}`}
                   style={{ background: c.color }}
-                  onClick={() => setTextColor(i)}
+                  onClick={() => setTextColorIdx(i)}
                   title={c.name}
                 />
               ))}
             </div>
           </div>
 
-          {/* Gel Finish Checkbox */}
-          <div className="checkbox-group">
-            <label className="custom-checkbox">
-              <input
-                type="checkbox"
-                checked={gelFinish}
-                onChange={() => setGelFinish(!gelFinish)}
-              />
-              <span className="checkmark"></span>
-              3D Gel Acrylic Embossing (+Rs. 500)
-            </label>
-          </div>
+          {/* DYNAMIC EXTRA ADDON CHECKBOXES MANAGED BY ADMIN */}
+          {extraOptions.length > 0 && (
+            <div className="control-group">
+              <label>Available Addons & Finishes</label>
+              <div className="checkbox-list">
+                {extraOptions.map((opt) => (
+                  <div className="checkbox-group" key={opt.id}>
+                    <label className="custom-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={!!selectedAddons[opt.id]}
+                        onChange={() => handleToggleAddon(opt.id)}
+                      />
+                      <span className="checkmark"></span>
+                      {opt.label} (+Rs. {opt.price})
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Quantity */}
           <div className="control-group">
@@ -173,7 +227,7 @@ export default function Customize() {
             <h4>Order Summary</h4>
             <div className="summary-row">
               <span>Unit Price</span>
-              <span>Rs. {price}</span>
+              <span>Rs. {unitPrice}</span>
             </div>
             <div className="summary-row">
               <span>Quantity</span>

@@ -7,6 +7,7 @@ const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
 const reviewRoutes = require('./routes/reviews');
 const statRoutes = require('./routes/stats');
+const customizationRoutes = require('./routes/customization');
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/stats', statRoutes);
+app.use('/api/customization', customizationRoutes);
 
 // Health check endpoint
 app.get('/api', (req, res) => res.json({ message: 'MKR Store API is running on Vercel!' }));

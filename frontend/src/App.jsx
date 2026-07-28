@@ -12,6 +12,7 @@ import AdminProducts from './pages/AdminProducts';
 import AdminEditProduct from './pages/AdminEditProduct';
 import AdminReviews from './pages/AdminReviews';
 import AdminStats from './pages/AdminStats';
+import AdminCustomization from './pages/AdminCustomization';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           <Route path="/admin/edit-product/:id" element={<AdminEditProduct />} />
           <Route path="/admin/reviews" element={<AdminReviews />} />
           <Route path="/admin/stats" element={<AdminStats />} />
+          <Route path="/admin/customization" element={<AdminCustomization />} />
         </Routes>
         <Footer />
       </BrowserRouter>
