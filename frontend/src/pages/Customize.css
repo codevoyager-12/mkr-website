@@ -1,315 +1,483 @@
-/* ===========================
-   CUSTOMIZE PAGE
-=========================== */
+/* ==========================================================
+3D TOYOTA FORTUNER CUSTOMIZER STYLES
+========================================================== */
 
 .customize-page {
-    padding: 80px 20px;
+  padding: 40px 24px 80px;
 }
 
-.customize-page h1 {
-    text-align: center;
-    color: var(--gold);
-    font-size: 3rem;
-    margin-bottom: 10px;
+.customize-header {
+  text-align: center;
+  margin-bottom: 40px;
 }
 
-.subtitle {
-    text-align: center;
-    color: #bdbdbd;
-    font-size: 1.1rem;
-    margin-bottom: 60px;
+.badge-3d-tag {
+  display: inline-block;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
 }
 
-/* ===========================
-   MAIN GRID
-=========================== */
+.customize-header h1 {
+  font-size: 3rem;
+  color: #fff;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.customize-header .subtitle {
+  color: var(--gray);
+  font-size: 1.15rem;
+  max-width: 650px;
+  margin: 0 auto;
+}
 
 .customize-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 50px;
-    align-items: start;
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 36px;
+  align-items: start;
 }
 
-/* ===========================
-   PREVIEW
-=========================== */
-
-.preview-section {
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 18px;
-    padding: 40px;
-    text-align: center;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
+/* 3D CAR MODEL CONTAINER */
+.view.model-container {
+  width: 100%;
 }
 
-.preview-section h2 {
-    color: var(--gold);
-    margin-bottom: 35px;
+.model-container .main {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.plate-preview {
-    width: 420px;
-    max-width: 100%;
-    height: 120px;
-
-    margin: auto;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 5px solid #000;
-    border-radius: 10px;
-
-    font-size: 2.5rem;
-    font-weight: bold;
-    letter-spacing: 5px;
-
-    transition: .3s;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, .4);
+@media (min-width: 961px) {
+  .view.model-container .viewer-wrapper {
+    width: 100%;
+    transition: width 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
 }
 
-.preview-info {
-    margin-top: 35px;
-    text-align: left;
+.viewer-wrapper {
+  position: relative;
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+  padding: 24px;
 }
 
-.preview-info p {
-    color: #ddd;
-    margin: 12px 0;
+.controls-bar-3d,
+.angle-toggles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
 }
 
-/* ===========================
-   CONTROLS
-=========================== */
+.angle-btn {
+  background: rgba(15, 19, 29, 0.8);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
 
+.angle-btn.active,
+.angle-btn:hover {
+  background: linear-gradient(135deg, #f5d76e, #d4af37);
+  color: #07090e;
+  border-color: var(--gold-light);
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.35);
+}
+
+.headlight-toggle {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.headlight-toggle.on {
+  border-color: var(--cyan-glow);
+  color: var(--cyan-glow);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+}
+
+/* CAR CANVAS VIEW & DYNAMIC NUMBER PLATE MOUNTING */
+.car-canvas-view {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #000;
+}
+
+.fortuner-car-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.headlight-beam-glow {
+  position: absolute;
+  top: 40%;
+  left: 20%;
+  width: 60%;
+  height: 40%;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.25), transparent 70%);
+  pointer-events: none;
+  filter: blur(20px);
+}
+
+/* MOUNTED NUMBER PLATE STYLING ON FORTUNER BUMPER */
+.mounted-plate {
+  position: absolute;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.8),
+    0 0 10px rgba(212, 175, 55, 0.3);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  text-transform: uppercase;
+  z-index: 10;
+}
+
+/* Front Bumper Mount Coordinates */
+.mounted-front-3d {
+  bottom: 22%;
+  left: 42%;
+  width: 135px;
+  height: 48px;
+  transform: perspective(600px) rotateX(12deg) scale(1);
+}
+
+/* 3/4 Perspective Bumper Mount Coordinates */
+.mounted-side-3d {
+  bottom: 26%;
+  left: 36%;
+  width: 110px;
+  height: 40px;
+  transform: perspective(600px) rotateY(-22deg) rotateX(8deg) scale(0.9);
+}
+
+.mounted-plate-top {
+  font-size: 0.55rem;
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+
+.mounted-plate-text {
+  font-size: 1.15rem;
+  letter-spacing: 1.5px;
+  font-family: 'Outfit', sans-serif;
+}
+
+.rotation-badge-3d {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(7, 9, 14, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--gray);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  backdrop-filter: blur(10px);
+}
+
+/* STANDALONE PLATE PREVIEW BAR */
+.standalone-preview-bar {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(7, 9, 14, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+.preview-label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+.plate-preview-box {
+  border-style: solid;
+  border-width: 3px;
+  border-radius: 8px;
+  padding: 8px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 180px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.plate-city-mini {
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+}
+
+.plate-main-text {
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* CONTROLS PANEL */
 .controls {
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 18px;
-    padding: 35px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
+  padding: 32px;
+}
+
+.controls h3 {
+  font-size: 1.6rem;
+  color: #fff;
+  margin-bottom: 24px;
+  font-weight: 800;
 }
 
 .control-group {
-    margin-bottom: 25px;
+  margin-bottom: 20px;
 }
 
 .control-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--gold);
-    font-weight: 600;
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #b5bbca;
+  margin-bottom: 10px;
 }
 
-.control-group input {
-    width: 100%;
-    padding: 13px;
-
-    background: #1a1a1a;
-    color: #fff;
-
-    border: 1px solid #444;
-    border-radius: 8px;
-
-    font-size: 1rem;
-    transition: .3s;
+.text-input-3d {
+  width: 100%;
+  padding: 14px 18px;
+  background: rgba(7, 9, 14, 0.8);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  outline: none;
+  transition: border-color 0.3s;
 }
 
-.control-group input:focus {
-    outline: none;
-    border-color: var(--gold);
+.text-input-3d:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
 }
 
-/* ===========================
-   COLOR OPTIONS
-=========================== */
+.qty-input {
+  width: 120px;
+}
 
 .color-options {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .color-swatch {
-    width: 45px;
-    height: 45px;
-
-    border-radius: 50%;
-    border: 3px solid #444;
-
-    cursor: pointer;
-    transition: .25s;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.25s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
-.color-swatch:hover {
-    transform: scale(1.15);
-}
-
+.color-swatch:hover,
 .color-swatch.active {
-    border-color: var(--gold);
-    transform: scale(1.15);
-    box-shadow: 0 0 12px rgba(212, 175, 55, .5);
+  transform: scale(1.15);
+  border-color: #fff !important;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
 }
-
-/* ===========================
-   CHECKBOX
-=========================== */
 
 .checkbox-group {
-    margin: 25px 0;
+  margin: 24px 0;
 }
 
-.checkbox-group label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    color: #ddd;
-    cursor: pointer;
+.custom-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.checkbox-group input {
-    width: 18px;
-    height: 18px;
+.custom-checkbox input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--gold);
+  cursor: pointer;
 }
 
-/* ===========================
-   SUMMARY
-=========================== */
-
-.summary {
-    margin-top: 35px;
-
-    background: #181818;
-    border: 1px solid #333;
-    border-radius: 12px;
-
-    padding: 25px;
+.summary-3d {
+  background: rgba(7, 9, 14, 0.7);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 24px 0;
 }
 
-.summary h2 {
-    color: var(--gold);
-    margin-bottom: 20px;
+.summary-3d h4 {
+  font-size: 1.1rem;
+  color: var(--gold);
+  margin-bottom: 14px;
 }
 
 .summary-row {
-    display: flex;
-    justify-content: space-between;
-
-    margin: 14px 0;
-    color: #ddd;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+  color: #cfd5e3;
 }
 
 .summary-row.total {
-    border-top: 1px solid #444;
-
-    margin-top: 20px;
-    padding-top: 20px;
-
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--gold);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 12px;
+  margin-top: 12px;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #fff;
 }
 
-/* ===========================
-   BUTTON
-=========================== */
-
-.add-cart-btn {
-    width: 100%;
-    margin-top: 30px;
-
-    padding: 15px;
-
-    border: none;
-    border-radius: 10px;
-
-    background: var(--gold);
-    color: #000;
-
-    font-size: 1rem;
-    font-weight: bold;
-
-    cursor: pointer;
-    transition: .3s;
+.total-gold {
+  color: var(--gold);
 }
 
-.add-cart-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(212, 175, 55, .4);
+.add-cart-btn-3d {
+  width: 100%;
+  padding: 16px;
+  font-size: 1.05rem;
 }
 
-/* ===========================
-   BENEFITS
-=========================== */
-
-.benefits {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-
-    gap: 25px;
-    margin-top: 80px;
+/* BENEFITS SECTION */
+.benefits-3d {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 80px;
 }
 
-.benefit-card {
-    background: #111;
-    border: 1px solid #333;
-    border-radius: 15px;
-
-    padding: 30px;
-    text-align: center;
-
-    transition: .3s;
+.benefit-card-3d {
+  padding: 32px 24px;
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  text-align: center;
 }
 
-.benefit-card:hover {
-    transform: translateY(-8px);
-    border-color: var(--gold);
+.benefit-icon {
+  font-size: 2.2rem;
+  margin-bottom: 14px;
 }
 
-.benefit-card h3 {
-    color: var(--gold);
-    margin-bottom: 15px;
+.benefit-card-3d h3 {
+  color: var(--gold);
+  font-size: 1.25rem;
+  margin-bottom: 10px;
 }
 
-.benefit-card p {
-    color: #bdbdbd;
-    line-height: 1.7;
+.benefit-card-3d p {
+  color: var(--gray);
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 
-/* ===========================
-   RESPONSIVE
-=========================== */
+/* MOBILE & TABLET RESPONSIVE MEDIA QUERIES */
+@media (max-width: 1024px) {
+  .customize-grid {
+    grid-template-columns: 1fr;
+  }
 
-@media (max-width: 1000px) {
-    .customize-grid {
-        grid-template-columns: 1fr;
-    }
+  .car-canvas-view {
+    height: 320px;
+  }
 
-    .benefits {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .mounted-front-3d {
+    width: 110px;
+    height: 38px;
+    bottom: 20%;
+    left: 40%;
+  }
+
+  .mounted-side-3d {
+    width: 90px;
+    height: 32px;
+    bottom: 24%;
+    left: 34%;
+  }
+
+  .benefits-3d {
+    grid-template-columns: 1fr;
+  }
 }
 
-@media (max-width: 768px) {
-    .customize-page h1 {
-        font-size: 2.2rem;
-    }
+@media (max-width: 640px) {
+  .customize-header h1 {
+    font-size: 2.2rem;
+  }
 
-    .plate-preview {
-        height: 100px;
-        font-size: 2rem;
-        letter-spacing: 3px;
-    }
+  .car-canvas-view {
+    height: 240px;
+  }
 
-    .benefits {
-        grid-template-columns: 1fr;
-    }
+  .mounted-front-3d {
+    width: 85px;
+    height: 30px;
+    bottom: 18%;
+    left: 38%;
+  }
 
-    .summary-row {
-        font-size: .95rem;
-    }
+  .mounted-plate-text {
+    font-size: 0.85rem;
+  }
+
+  .mounted-plate-top {
+    font-size: 0.45rem;
+  }
+
+  .standalone-preview-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .controls {
+    padding: 20px;
+  }
 }
