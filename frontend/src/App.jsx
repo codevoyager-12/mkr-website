@@ -10,6 +10,8 @@ import { CartProvider } from './context/CartContext';
 import AdminAddProduct from './pages/AdminAddProduct';
 import AdminProducts from './pages/AdminProducts';
 import AdminEditProduct from './pages/AdminEditProduct';
+import AdminReviews from './pages/AdminReviews';
+import AdminStats from './pages/AdminStats';
 
 function App() {
   return (
@@ -24,7 +26,9 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin/add-product" element={<AdminAddProduct />} />
           <Route path="/admin/products" element={<AdminProducts />} />
-<Route path="/admin/edit-product/:id" element={<AdminEditProduct />} />
+          <Route path="/admin/edit-product/:id" element={<AdminEditProduct />} />
+          <Route path="/admin/reviews" element={<AdminReviews />} />
+          <Route path="/admin/stats" element={<AdminStats />} />
         </Routes>
         <Footer />
       </BrowserRouter>

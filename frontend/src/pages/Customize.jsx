@@ -27,8 +27,6 @@ export default function Customize() {
   const [cityText, setCityText] = useState("PAKISTAN");
   const [plateColor, setPlateColor] = useState(0); // Default to Yellow MKR Edition
   const [textColor, setTextColor] = useState(0);
-  const [viewAngle, setViewAngle] = useState("front"); // 'front' or 'side'
-  const [headlightsOn, setHeadlightsOn] = useState(true);
   const [gelFinish, setGelFinish] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
@@ -38,7 +36,7 @@ export default function Customize() {
 
   const handleAdd = () => {
     addToCart({
-      name: `Custom 3D Fortuner Plate (${plateText})`,
+      name: `Custom Plate (${plateText})`,
       price: total,
       plate_text: `${plateText} (${cityText})`,
       plate_color: PLATE_COLORS[plateColor].name,
@@ -53,94 +51,44 @@ export default function Customize() {
   return (
     <div className="container customize-page">
       <div className="customize-header">
-        <span className="badge-3d-tag">TOYOTA FORTUNER 3D VIEW</span>
-        <h1>3D Toyota Fortuner Plate Customizer</h1>
+        <span className="badge-3d-tag">CUSTOMIZABLE EDITION</span>
+        <h1>Design Your Custom Plate</h1>
         <p className="subtitle">
-          Design your custom 3D plate and visualize it mounted on a White Toyota Fortuner in real-time.
+          Personalize your luxury 3D number plate with live instant preview.
         </p>
       </div>
 
       <div className="customize-grid">
-        {/* 3D CAR MODEL CONTAINER */}
-        <div className="view model-container">
-          <div className="viewer-wrapper carbon-panel">
-            <div className="controls-bar-3d">
-              <div className="angle-toggles">
-                <button
-                  className={`angle-btn ${viewAngle === "front" ? "active" : ""}`}
-                  onClick={() => setViewAngle("front")}
-                >
-                  🚘 Front Bumper View
-                </button>
-                <button
-                  className={`angle-btn ${viewAngle === "side" ? "active" : ""}`}
-                  onClick={() => setViewAngle("side")}
-                >
-                  🏎️ 3/4 Perspective View
-                </button>
-              </div>
+        {/* PREVIEW SECTION */}
+        <div className="preview-section glass-panel">
+          <h3>Live Plate Preview</h3>
 
-              <button
-                className={`headlight-toggle ${headlightsOn ? "on" : ""}`}
-                onClick={() => setHeadlightsOn(!headlightsOn)}
-              >
-                💡 Headlights {headlightsOn ? "ON" : "OFF"}
-              </button>
-            </div>
+          <div
+            className="plate-preview-box-large"
+            style={{
+              backgroundColor: PLATE_COLORS[plateColor].bg,
+              borderColor: PLATE_COLORS[plateColor].border,
+              color: TEXT_COLORS[textColor].color,
+            }}
+          >
+            <div className="plate-top-city">{cityText || "PAKISTAN"}</div>
+            <div className="plate-main-number">{plateText || "MKR"}</div>
+          </div>
 
-            {/* 3D CAR CANVAS VIEW */}
-            <div className={`car-canvas-view ${viewAngle}`}>
-              <img
-                src={viewAngle === "front" ? "/fortuner-front.jpg" : "/fortuner-side.jpg"}
-                alt="White Toyota Fortuner 3D Model"
-                className="fortuner-car-image"
-              />
-
-              {headlightsOn && <div className="headlight-beam-glow"></div>}
-
-              {/* DYNAMICALLY MOUNTED NUMBER PLATE ON FORTUNER BUMPER */}
-              <div
-                className={`mounted-plate mounted-${viewAngle}-3d`}
-                style={{
-                  backgroundColor: PLATE_COLORS[plateColor].bg,
-                  borderColor: PLATE_COLORS[plateColor].border,
-                  color: TEXT_COLORS[textColor].color,
-                }}
-              >
-                <div className="mounted-plate-top">{cityText || "PAKISTAN"}</div>
-                <div className="mounted-plate-text">{plateText || "MKR"}</div>
-              </div>
-
-              <div className="rotation-badge-3d">
-                <span>🔄 3D ROTATABLE MODEL VIEW</span>
-              </div>
-            </div>
-
-            {/* STANDALONE PLATE PREVIEW */}
-            <div className="standalone-preview-bar">
-              <span className="preview-label">PLATE DIRECT PREVIEW:</span>
-              <div
-                className="plate-preview-box"
-                style={{
-                  backgroundColor: PLATE_COLORS[plateColor].bg,
-                  borderColor: PLATE_COLORS[plateColor].border,
-                  color: TEXT_COLORS[textColor].color,
-                }}
-              >
-                <span className="plate-city-mini">{cityText}</span>
-                <span className="plate-main-text">{plateText || "MKR"}</span>
-              </div>
-            </div>
+          <div className="preview-spec-list">
+            <p><strong>Finish:</strong> {PLATE_COLORS[plateColor].name}</p>
+            <p><strong>Text Color:</strong> {TEXT_COLORS[textColor].name}</p>
+            <p><strong>3D Gel Embossing:</strong> {gelFinish ? "Yes (+Rs. 500)" : "Standard"}</p>
           </div>
         </div>
 
-        {/* CUSTOMIZATION CONTROLS */}
+        {/* CONTROLS PANEL */}
         <div className="controls glass-panel">
           <h3>Customization Options</h3>
 
           {/* Plate Main Text */}
           <div className="control-group">
-            <label>Plate Text (Max 8 Chars)</label>
+            <label>Plate Number Text (Max 8 Chars)</label>
             <input
               maxLength={8}
               value={plateText}
@@ -238,31 +186,10 @@ export default function Customize() {
           </div>
 
           <button className="btn add-cart-btn-3d" onClick={handleAdd}>
-            🛒 Add 3D Fortuner Plate To Cart
+            🛒 Add Plate To Cart
           </button>
         </div>
       </div>
-
-      {/* AUTOMOTIVE BENEFITS */}
-      <section className="benefits-3d">
-        <div className="benefit-card-3d carbon-panel">
-          <div className="benefit-icon">🛡️</div>
-          <h3>Fortuner Custom Fit</h3>
-          <p>Standard bumper dimensions designed specifically for Toyota Fortuner & SUVs.</p>
-        </div>
-
-        <div className="benefit-card-3d carbon-panel">
-          <div className="benefit-icon">🌧️</div>
-          <h3>All-Weather Durability</h3>
-          <p>UV-protected acrylic & waterproof metallic seal to withstand extreme heat and rain.</p>
-        </div>
-
-        <div className="benefit-card-3d carbon-panel">
-          <div className="benefit-icon">⚡</div>
-          <h3>Express Nationwide Delivery</h3>
-          <p>Shipped safely across Pakistan in 3–5 business days with insured courier delivery.</p>
-        </div>
-      </section>
     </div>
   );
 }

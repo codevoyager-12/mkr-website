@@ -5,6 +5,8 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
+const reviewRoutes = require('./routes/reviews');
+const statRoutes = require('./routes/stats');
 
 const app = express();
 
@@ -15,6 +17,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // API Routes
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/stats', statRoutes);
 
 // Health check endpoint
 app.get('/api', (req, res) => res.json({ message: 'MKR Store API is running on Vercel!' }));
